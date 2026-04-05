@@ -15,9 +15,21 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const SUPPORTED_PROVIDERS = [
+    { id: "google", name: "Google", icon: "https://www.svgrepo.com/show/475656/google-color.svg" },
+    { id: "github", name: "GitHub", icon: "https://www.svgrepo.com/show/512317/github-142.svg" },
+    { id: "discord", name: "Discord", icon: "https://www.svgrepo.com/show/353655/discord-icon.svg" },
+    { id: "spotify", name: "Spotify", icon: "https://www.svgrepo.com/show/452093/spotify.svg" },
+    { id: "twitch", name: "Twitch", icon: "https://www.svgrepo.com/show/354477/twitch.svg" },
+    { id: "apple", name: "Apple", icon: "https://www.svgrepo.com/show/511330/apple-173.svg" },
+    { id: "microsoft", name: "Microsoft", icon: "https://www.svgrepo.com/show/512461/microsoft-150.svg" },
+];
 
 export default function ProvidersClient({ initialProviders }: any) {
     const [providers, setProviders] = useState(initialProviders);
+    const [showSelector, setShowSelector] = useState(false);
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
     const handleUpdate = async (provider: any) => {
@@ -34,23 +46,27 @@ export default function ProvidersClient({ initialProviders }: any) {
     const handleDelete = async (id: string) => {
         if (!confirm("TERMINATE_PROTOCOL: Are you sure you want to decommission this identity node?")) return;
         try {
-            // No UI state for delete yet, just reload
+            await updateProviderAction({ id, enabled: false }); // Disable first?
             window.location.reload(); 
         } catch (err) {
             alert("FAILURE: Protocol termination denied.");
         }
     };
 
-    const addNewProvider = () => {
-        const id = `NODE_${Math.random().toString(36).substring(7).toUpperCase()}`;
+    const addNewProvider = (template: any) => {
+        if (providers.find((p: any) => p.id === template.id)) {
+            alert(`CONFLICT: Protocol ${template.id} is already operational.`);
+            return;
+        }
         const newProvider = {
-            id,
-            name: "NEW_PROTOCOL",
+            id: template.id,
+            name: template.name,
             clientId: "",
             clientSecret: "",
             enabled: false
         };
         setProviders([newProvider, ...providers]);
+        setShowSelector(false);
     };
 
     return (
@@ -67,14 +83,30 @@ export default function ProvidersClient({ initialProviders }: any) {
                 </div>
                 
                 <Button 
-                    onClick={addNewProvider}
+                    onClick={() => setShowSelector(!showSelector)}
                     variant="secondary" 
-                    className="gap-2 border-white/5 hover:border-emerald-500/30"
+                    className={`gap-2 border-white/5 hover:border-emerald-500/30 transition-all ${showSelector ? 'bg-emerald-500 text-black shadow-[0_0_20px_#10b981]' : ''}`}
                 >
-                    <Plus className="w-4 h-4" />
-                    <span>Register_New_Protocol</span>
+                    <Plus className={cn("w-4 h-4 transition-transform", showSelector ? "rotate-45" : "")} />
+                    <span>Authorize_Provider</span>
                 </Button>
             </div>
+
+            {/* Provider Selector Grid */}
+            {showSelector && (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] animate-in zoom-in-95 duration-500">
+                    {SUPPORTED_PROVIDERS.map((template) => (
+                        <button
+                            key={template.id}
+                            onClick={() => addNewProvider(template)}
+                            className="flex flex-col items-center gap-4 p-6 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group"
+                        >
+                            <img src={template.icon} className="w-8 h-8 grayscale group-hover:grayscale-0 transition-all" alt={template.name} />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white">{template.name}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* Providers Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -85,8 +117,8 @@ export default function ProvidersClient({ initialProviders }: any) {
                                 <div className="w-16 h-16 rounded-[1.5rem] bg-zinc-900 border border-white/5 flex items-center justify-center p-4 relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
                                     <img 
-                                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${p.id}&backgroundColor=10b981`} 
-                                        className="w-full h-full rounded-xl object-contain opacity-60 group-hover:opacity-100 transition-opacity" 
+                                        src={SUPPORTED_PROVIDERS.find(sp => sp.id === p.id)?.icon || `https://api.dicebear.com/7.x/initials/svg?seed=${p.id}&backgroundColor=10b981`} 
+                                        className={cn("w-full h-full rounded-xl object-contain transition-opacity", p.enabled ? "opacity-100" : "opacity-40 grayscale")} 
                                         alt={p.id} 
                                     />
                                 </div>

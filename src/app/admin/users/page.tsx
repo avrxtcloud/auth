@@ -2,10 +2,12 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { user } from "@/lib/db/schema";
-import { Shield, User, Mail, Calendar, MoreVertical, Search, Filter } from "lucide-react";
+import { user, session as sessionTable } from "@/lib/db/schema";
+import { sql, eq } from "drizzle-orm";
+import { Shield, User, Mail, Calendar, MoreVertical, Search, Filter, Ban, Unlock, ZapOff } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import UserControls from "./UserControls";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +20,16 @@ export default async function AdminUsersPage() {
         redirect("/login/admin?error=unauthorized");
     }
 
-    const allUsers = await db.select().from(user).orderBy(user.createdAt);
+    const allUsers = await db.select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        role: user.role,
+        banned: user.banned,
+        createdAt: user.createdAt,
+        sessionCount: sql<number>`(SELECT count(*) FROM ${sessionTable} WHERE ${sessionTable.userId} = ${user.id})`
+    }).from(user).orderBy(user.createdAt);
 
     return (
         <div className="space-y-10 animate-fade-in">
@@ -34,7 +45,7 @@ export default async function AdminUsersPage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-hover:text-emerald-500 transition-colors" />
                         <input 
                             placeholder="SEARCH_BY_ID_OR_NAME..." 
-                            className="bg-white/[0.02] border border-white/5 rounded-2xl py-4 pl-12 pr-6 text-[10px] font-mono uppercase tracking-widest focus:border-emerald-500/30 outline-none w-[300px] transition-all"
+                            className="bg-zinc-900/40 border border-white/5 rounded-2xl py-4 pl-12 pr-6 text-[10px] font-mono uppercase tracking-widest focus:border-emerald-500/30 outline-none w-[300px] transition-all"
                         />
                     </div>
                 </div>
@@ -48,8 +59,9 @@ export default async function AdminUsersPage() {
                             <tr className="border-b border-white/5 bg-white/[0.01]">
                                 <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Identity</th>
                                 <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Administrative_Clearance</th>
-                                <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Established_Timestamp</th>
-                                <th className="p-8 text-right text-[10px] font-black uppercase tracking-widest text-zinc-700">Controls</th>
+                                <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Sessions</th>
+                                <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Audit_Status</th>
+                                <th className="p-8 text-right text-[10px] font-black uppercase tracking-widest text-zinc-700">Governance_Controls</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,17 +91,18 @@ export default async function AdminUsersPage() {
                                         </div>
                                     </td>
                                     <td className="p-8">
-                                        <div className="flex items-center gap-3 opacity-40">
-                                            <Calendar className="w-4 h-4" />
-                                            <span className="text-[10px] font-mono uppercase tracking-tighter">
-                                                {new Date(u.createdAt).toLocaleDateString()}
-                                            </span>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[10px] font-mono font-black text-white">{u.sessionCount}</span>
+                                            <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-tighter">Active_Tokens</span>
                                         </div>
                                     </td>
+                                    <td className="p-8">
+                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${u.banned ? 'text-red-500 border-red-500/20 bg-red-500/5' : 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5'}`}>
+                                            {u.banned ? 'BLACKLISTED' : 'CLEAR'}
+                                        </span>
+                                    </td>
                                     <td className="p-8 text-right">
-                                        <Button variant="ghost" size="icon" className="opacity-20 hover:opacity-100 hover:bg-white/5">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </Button>
+                                        <UserControls user={u} />
                                     </td>
                                 </tr>
                             ))}
