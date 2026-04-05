@@ -122,7 +122,7 @@ export async function getDynamicAuthConfig() {
 					defaultValue: false,
 				},
 			}
-		},
+		} as const,
 
 		socialProviders
 	};
@@ -153,5 +153,5 @@ export const auth = betterAuth({
 				defaultValue: false,
 			},
 		}
-	},
+	} as const,
 });
