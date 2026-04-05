@@ -9,20 +9,22 @@ Dedicated Authentication Gateway for `auth.avrxt.in`.
 - **Admin Dashboard**: Isolated administrative control for user roles.
 - **Cross-Subdomain**: Specifically configured to share sessions with `www.avrxt.in` via `.avrxt.in` domain cookies.
 
-## Deployment (Render)
+## Deployment (Vercel)
 
-1. **New Web Service**: Connect this repository to a new Render Web Service.
+1. **New Project**: Connect this repository to your Vercel dashboard.
 2. **Environment Variables**:
    - `DATABASE_URL`: Your Neon DB connection string.
    - `BETTER_AUTH_SECRET`: A secure 32-character string.
    - `DISCORD_CLIENT_ID`: From Discord Dev Portal.
    - `DISCORD_CLIENT_SECRET`: From Discord Dev Portal.
+   - `DISCORD_GUILD_ID`: Target Server ID.
+   - `DISCORD_ADMIN_ROLE_ID`: Required Role ID.
    - `NEXT_PUBLIC_AUTH_URL`: `https://auth.avrxt.in`
    - `BETTER_AUTH_URL`: `https://auth.avrxt.in`
    - `NEXT_PUBLIC_APP_URL`: `https://www.avrxt.in`
 3. **Custom Domains**:
-   - Attach `auth.avrxt.in` to the Render service.
-   - Ensure the CNAME/A record is correctly pointed.
+   - Add `auth.avrxt.in` to the project domains in Vercel.
+   - Ensure the CNAME/A record points to Vercel's Edge network.
 
 ## Technical Notes
 
