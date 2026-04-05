@@ -109,6 +109,21 @@ export async function getDynamicAuthConfig() {
 			}),
 		],
 
+		user: {
+			additionalFields: {
+				role: {
+					type: "string",
+					required: false,
+					defaultValue: "user",
+				},
+				banned: {
+					type: "boolean",
+					required: false,
+					defaultValue: false,
+				},
+			}
+		},
+
 		socialProviders
 	};
 }
