@@ -23,6 +23,7 @@ export async function getDynamicAuthConfig() {
 
 			if (guildId && adminRoleId && tokens?.accessToken) {
 				try {
+					console.log(`[AUTH] Checking Discord Role for: ${profile.username}`);
 					const res = await fetch(`https://discord.com/api/v10/users/@me/guilds/${guildId}/member`, {
 						headers: {
 							Authorization: `Bearer ${tokens.accessToken}`,
@@ -36,10 +37,25 @@ export async function getDynamicAuthConfig() {
 							role = "admin";
 							console.log(`[AUTH] Admin Node Access Granted: ${profile.username} (${profile.id})`);
 						}
+					} else {
+						console.warn(`[AUTH] Discord API Error: ${res.status} ${res.statusText}`);
 					}
 				} catch (e) {
 					console.error("[AUTH] Discord Role Check Pipeline Error:", e);
 				}
+			} else {
+				console.warn("[AUTH] Discord IDs or Access Token Missing - Role Check Skipped");
+			}
+
+			// BOOTSTRAP: If no users exist, make this one admin
+			try {
+				const users = await db.query.user.findMany({ limit: 1 });
+				if (users.length === 0) {
+					role = "admin";
+					console.log(`[AUTH] BOOTSTRAP_PROTOCOL: First user ${profile.username} promoted to system admin.`);
+				}
+			} catch (e) {
+				console.error("[AUTH] Bootstrap Check Failed:", e);
 			}
 
 			return {
