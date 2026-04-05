@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: avrxt-auth
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NEXT_PUBLIC_AUTH_URL
+        value: https://auth.avrxt.in
+      - key: BETTER_AUTH_URL
+        value: https://auth.avrxt.in
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://www.avrxt.in
