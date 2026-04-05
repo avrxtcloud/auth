@@ -157,15 +157,6 @@ export default async function AdminDashboard() {
                 </main>
             </div>
 
-            <style jsx>{`
-                .text-2xl { font-size: 1.5rem; }
-                .text-lg { font-size: 1.125rem; }
-                .text-muted { color: var(--muted); }
-                .tracking-wider { letter-spacing: 0.05em; }
-                .tracking-widest { letter-spacing: 0.1em; }
-                .mb-12 { margin-bottom: 3rem; }
-                .animate-fade-in { opacity: 0; animation: fadeIn 0.8s forwards; }
-            `}</style>
         </div>
     );
 }

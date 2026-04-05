@@ -86,31 +86,6 @@ export default function AdminLoginPage() {
                 </div>
             </div>
 
-            {/* Custom CSS overrides for tailwind-like behavior on pure CSS project */}
-            <style jsx>{`
-                .text-4xl { font-size: 2.25rem; }
-                .text-xl { font-size: 1.25rem; }
-                .text-sm { font-size: 0.875rem; }
-                .font-bold { font-weight: 700; }
-                .font-semibold { font-weight: 600; }
-                .mb-10 { margin-bottom: 2.5rem; }
-                .mb-2 { margin-bottom: 0.5rem; }
-                .mb-3 { margin-bottom: 0.75rem; }
-                .mb-4 { margin-bottom: 1rem; }
-                .mb-6 { margin-bottom: 1.5rem; }
-                .mb-8 { margin-bottom: 2rem; }
-                .mt-8 { margin-top: 2rem; }
-                .tracking-tight { letter-spacing: -0.025em; }
-                .tracking-widest { letter-spacing: 0.1em; }
-                .text-center { text-align: center; }
-                .rotate-12 { transform: rotate(12deg); }
-                .hover\:rotate-0:hover { transform: rotate(0deg); }
-                .transition-all { transition: all 0.5s; }
-                .duration-500 { transition-duration: 0.5s; }
-                .gap-2 { gap: 0.5rem; }
-                .gap-6 { gap: 1.5rem; }
-                .uppercase { text-transform: uppercase; }
-            `}</style>
         </main>
     );
 }

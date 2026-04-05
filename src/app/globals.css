@@ -153,3 +153,31 @@ p.muted {
 .animate-fade-in {
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Dashboard Utilities */
+.text-2xl { font-size: 1.5rem; }
+.text-lg { font-size: 1.125rem; }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.text-muted { color: var(--muted); }
+.tracking-wider { letter-spacing: 0.05em; }
+.tracking-widest { letter-spacing: 0.1em; }
+.mb-12 { margin-bottom: 3rem; }
+.bg-mesh { z-index: -1; }
+
+/* Utility Classes */
+.text-4xl { font-size: 2.25rem; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.mb-10 { margin-bottom: 2.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+.tracking-tight { letter-spacing: -0.025em; }
+.text-center { text-align: center; }
+.rotate-12 { transform: rotate(12deg); }
+.gap-2 { gap: 0.5rem; }
+.gap-6 { gap: 1.5rem; }
+.uppercase { text-transform: uppercase; }
