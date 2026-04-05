@@ -23,7 +23,7 @@ export default async function AdminDashboard() {
     });
 
     if (!session || (session.user as any).role !== 'admin') {
-        redirect("/login/admin");
+        redirect("/login/admin?error=unauthorized");
     }
 
     const stats = [

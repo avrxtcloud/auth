@@ -31,7 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Protection check
     useEffect(() => {
         if (!isPending && (!session?.user || (session.user as any).role !== 'admin')) {
-            router.push('/login/admin');
+            router.push('/login/admin?error=unauthorized');
         }
     }, [session, isPending, router]);
 

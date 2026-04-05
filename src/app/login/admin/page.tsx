@@ -5,10 +5,20 @@ import { useState } from "react";
 import { Shield, Lock, ShieldCheck, ChevronRight } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-export default function AdminLoginPage() {
+function LoginContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const searchParams = useSearchParams();
+    const errorParam = searchParams.get("error");
+
+    useEffect(() => {
+        if (errorParam === "unauthorized") {
+            setError("ACCESS_DENIED: Administrative clearance required for this terminal session.");
+        }
+    }, [errorParam]);
 
     const handleLogin = async () => {
         setLoading(true);
@@ -62,7 +72,7 @@ export default function AdminLoginPage() {
                         </p>
 
                         {error && (
-                            <div className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-pulse">
+                            <div className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake">
                                 {error}
                             </div>
                         )}
@@ -119,5 +129,17 @@ export default function AdminLoginPage() {
                 </p>
             </div>
         </main>
+    );
+}
+
+export default function AdminLoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="w-10 h-10 border-2 border-white/10 border-t-emerald-500 rounded-full animate-spin" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }
