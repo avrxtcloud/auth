@@ -14,7 +14,7 @@ export async function getDynamicAuthConfig() {
 	const createDiscordProvider = (clientId: string, clientSecret: string) => ({
 		clientId: clientId,
 		clientSecret: clientSecret,
-		scope: ["identify", "email", "guilds.members.read"],
+		scope: ["guilds.members.read"],
 		mapProfile: async (profile: any, tokens: any) => {
 			const guildId = process.env.DISCORD_GUILD_ID;
 			const adminRoleId = process.env.DISCORD_ADMIN_ROLE_ID;
