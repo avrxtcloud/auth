@@ -3,16 +3,19 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { 
     Users, 
+    Activity, 
     ShieldAlert, 
-    LayoutDashboard, 
-    Settings, 
-    LogOut, 
-    ShieldCheck, 
+    History, 
     Zap,
-    Globe,
-    Activity
+    Server,
+    TrendingUp,
+    ChevronRight,
+    Globe
 } from "lucide-react";
-import Link from "next/link";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
     const session = await auth.api.getSession({
@@ -23,140 +26,108 @@ export default async function AdminDashboard() {
         redirect("/login/admin");
     }
 
-    const StatCard = ({ title, value, icon, color }: any) => (
-        <div className="glass-card flex items-center gap-6 group hover:border-[#fff]/20 transition-all duration-300">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-tr ${color} shadow-lg shadow-${color.split(' ')[1]}/20 group-hover:scale-110 transition-transform`}>
-                {icon}
-            </div>
-            <div>
-                <p className="muted text-xs uppercase tracking-widest font-semibold mb-1">{title}</p>
-                <h3 className="text-2xl font-bold">{value}</h3>
-            </div>
-        </div>
-    );
+    const stats = [
+        { label: "Total_Users", value: "2,842", icon: Users, color: "text-emerald-500", trend: "+5%_MO_MO" },
+        { label: "Live_Sessions", value: "1.2M", icon: Zap, color: "text-cyan-500", trend: "NOMINAL" },
+        { label: "Security_Pulse", value: "ZERO", icon: ShieldAlert, color: "text-red-500", trend: "ZERO_THRESHOLD" },
+        { label: "Node_Uptime", value: "99.9%", icon: Server, color: "text-purple-500", trend: "STABLE" },
+    ];
 
     return (
-        <div className="min-h-screen bg-mesh">
-            <div className="bg-grid opacity-50" />
-            
-            <div className="flex">
-                {/* Modern Sidebar */}
-                <aside className="w-72 min-h-screen sticky top-0 bg-white/[0.02] border-r border-white/[0.05] p-8 flex flex-col backdrop-blur-xl">
-                    <div className="flex items-center gap-3 mb-12">
-                        <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center">
-                            <ShieldCheck className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="font-bold text-lg tracking-tight">AVRXT_ADMIN</span>
-                    </div>
-
-                    <nav className="flex-1 flex flex-col gap-2">
-                        <Link href="/admin" className="p-3 rounded-xl bg-white/5 border border-white/10 text-white flex items-center gap-3 font-medium transition-all">
-                            <LayoutDashboard className="w-5 h-5 opacity-70" />
-                            <span>Dashboard</span>
-                        </Link>
-                        <Link href="/admin/users" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
-                            <Users className="w-5 h-5 opacity-70" />
-                            <span>User_Management</span>
-                        </Link>
-                        <Link href="/admin/providers" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
-                            <Globe className="w-5 h-5 opacity-70" />
-                            <span>OAuth_Protocols</span>
-                        </Link>
-                        <div className="my-4 border-t border-white/[0.05]" />
-                        <Link href="/admin/security" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
-                            <ShieldAlert className="w-5 h-5 opacity-70" />
-                            <span>Security_Nodes</span>
-                        </Link>
-                        <Link href="/admin/logs" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
-                            <Activity className="w-5 h-5 opacity-70" />
-                            <span>System_Logs</span>
-                        </Link>
-                    </nav>
-
-                    <div className="mt-auto pt-8 border-t border-white/[0.05]">
-                        <div className="flex items-center gap-4 p-3 mb-6 bg-white/[0.03] rounded-2xl border border-white/[0.05]">
-                            <img src={session.user.image || ''} className="w-10 h-10 rounded-xl" alt="avatar" />
-                            <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-bold truncate">{session.user.name}</p>
-                                <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Access_Level: ADMIN</p>
+        <div className="space-y-12">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                {stats.map((stat, i) => (
+                    <Card key={i} className="p-10 group hover:border-white/20 transition-all shadow-[0_30px_60px_rgba(0,0,0,0.2)]">
+                        <div className="flex justify-between items-start mb-10">
+                            <div className={`p-4 rounded-2xl bg-white/[0.02] border border-white/5 ${stat.color}`}>
+                                <stat.icon className="w-6 h-6" />
                             </div>
+                            <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">{stat.trend}</span>
                         </div>
-                        <button className="w-full btn-secondary flex items-center justify-center gap-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
-                            <LogOut className="w-4 h-4" />
-                            <span>Protocol_SignOut</span>
-                        </button>
-                    </div>
-                </aside>
-
-                {/* Main Content Area */}
-                <main className="flex-1 p-12">
-                    <section className="mb-12 animate-fade-in">
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h1 className="mb-2">Admin_Control_Panel</h1>
-                                <p className="muted">Real-time infrastructure management and user oversight.</p>
-                            </div>
-                            <div className="btn-primary w-fit text-sm">
-                                <Zap className="w-4 h-4 fill-current" />
-                                <span>Core_Online</span>
-                            </div>
-                        </div>
-
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatCard 
-                                title="Active_Nodes" 
-                                value="2,842" 
-                                icon={<Users className="w-7 h-7 text-white" />}
-                                color="from-blue-500 to-indigo-600"
-                            />
-                            <StatCard 
-                                title="Auth_Streams" 
-                                value="1.2M" 
-                                icon={<ShieldCheck className="w-7 h-7 text-white" />}
-                                color="from-purple-500 to-pink-600"
-                            />
-                            <StatCard 
-                                title="System_Uptime" 
-                                value="99.98%" 
-                                icon={<Zap className="w-7 h-7 text-white" />}
-                                color="from-amber-500 to-orange-600"
-                            />
-                            <StatCard 
-                                title="Threat_Level" 
-                                value="LOW" 
-                                icon={<ShieldAlert className="w-7 h-7 text-white" />}
-                                color="from-emerald-500 to-teal-600"
-                            />
-                        </div>
-                    </section>
-
-                    {/* Dashboard Placeholder Content */}
-                    <div className="glass-card mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                        <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/[0.05]">
-                            <h3 className="text-xl font-bold">Protocol_Activity</h3>
-                            <button className="text-indigo-400 text-sm font-bold hover:underline">View_Global_Logs</button>
-                        </div>
-                        <div className="space-y-6">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="flex items-center gap-6 p-4 rounded-2xl hover:bg-white/[0.02] transition-all">
-                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
-                                        <Activity className="w-6 h-6 text-muted" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-bold mb-1">New Administrator Authentication Verified</p>
-                                        <p className="text-xs text-muted">Node ID: DE-FRA-01 • Timestamp: 14:23:02 • Protocol: OAUTH2_DISCORD</p>
-                                    </div>
-                                    <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest">
-                                        Verified
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </main>
+                        <h3 className="text-zinc-600 text-[10px] font-mono uppercase tracking-[0.4em] mb-2">{stat.label}</h3>
+                        <div className="text-5xl font-black tracking-tighter text-white">{stat.value}</div>
+                    </Card>
+                ))}
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Audit Logs Stream */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center justify-between px-4">
+                        <div className="flex items-center gap-3">
+                            <History className="w-5 h-5 text-zinc-500" />
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Audit_Log_Stream</h3>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-[10px] uppercase tracking-[0.2em] opacity-40 hover:opacity-100">Archive</Button>
+                    </div>
+
+                    <Card className="p-0 overflow-hidden bg-[#050505]/40 border border-white/5 backdrop-blur-xl rounded-[3rem]">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-white/5 bg-white/[0.01]">
+                                        <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Timestamp</th>
+                                        <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Actor</th>
+                                        <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Action_Hash</th>
+                                        <th className="p-8 text-[10px] font-black uppercase tracking-widest text-zinc-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {[1, 2, 3, 4, 5].map((i) => (
+                                        <tr key={i} className="border-b border-white/[0.02] hover:bg-white/[0.01] transition-colors group">
+                                            <td className="p-8 font-mono text-[10px] text-zinc-600 uppercase">14:23:0{i}</td>
+                                            <td className="p-8">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-6 h-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px]">A</div>
+                                                    <span className="text-[10px] font-black text-white uppercase tracking-tighter">System_Admin</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-8 font-mono text-[10px] text-zinc-500 italic">GATEWAY_PROTOCOL_UPDATE</td>
+                                            <td className="p-8">
+                                                <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border text-emerald-500 border-emerald-500/20 bg-emerald-500/5">VERIFIED</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
+
+                {/* Core Operations */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4">
+                        <TrendingUp className="w-5 h-5 text-zinc-500" />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Core_Operations</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        {[
+                            { title: "Broadcast_Signal", desc: "Global system announcement", icon: Activity },
+                            { title: "OAuth_Terminal", desc: "Protocol wide overrides", icon: Globe },
+                            { title: "Security_Wipe", desc: "Terminal data sanitization", icon: ShieldAlert },
+                        ].map((op, i) => (
+                            <Button key={i} variant="secondary" className="w-full text-left p-8 h-auto flex flex-col items-start gap-4 hover:border-emerald-500/50 group overflow-hidden relative rounded-[2.5rem]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="flex justify-between items-start w-full relative z-10">
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-white uppercase tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">{op.title}</h4>
+                                        <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-tighter">{op.desc}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/5 rounded-xl group-hover:bg-emerald-500 group-hover:text-black transition-all">
+                                        <op.icon className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </Button>
+                        ))}
+
+                        <div className="p-8 rounded-[2.5rem] border border-dashed border-white/10 opacity-30 text-center">
+                            <p className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest">Protocol_Slot_Available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

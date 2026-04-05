@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { updateProviderAction, deleteProviderAction } from "./actions";
+import { updateProviderAction } from "./actions";
 import { 
     Plus, 
     Trash2, 
     Save, 
     MoreVertical, 
-    CheckCircle, 
-    XCircle,
     LayoutGrid,
-    LayoutList
+    LayoutList,
+    ChevronRight,
+    Search,
+    Shield
 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function ProvidersClient({ initialProviders }: any) {
     const [providers, setProviders] = useState(initialProviders);
@@ -21,7 +24,6 @@ export default function ProvidersClient({ initialProviders }: any) {
         setIsSaving(provider.id);
         try {
             await updateProviderAction(provider);
-            // Visual feedback
         } catch (err) {
             alert("Failed to update protocol node.");
         } finally {
@@ -30,113 +32,116 @@ export default function ProvidersClient({ initialProviders }: any) {
     };
 
     return (
-        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <div className="animate-fade-in space-y-10">
             {/* Toolbar Area */}
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex bg-white/5 rounded-xl border border-white/10 p-1">
-                    <button className="p-2 rounded-lg bg-white/10 text-white transition-all">
-                        <LayoutGrid className="w-5 h-5 opacity-80" />
-                    </button>
-                    <button className="p-2 rounded-lg text-muted hover:text-white transition-all">
-                        <LayoutList className="w-5 h-5 opacity-80" />
-                    </button>
+            <div className="flex items-center justify-between">
+                <div className="flex bg-white/5 rounded-xl border border-white/5 p-1 backdrop-blur-xl">
+                    <Button variant="ghost" size="icon" className="bg-white/5 text-white">
+                        <LayoutGrid className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="opacity-40 hover:opacity-100">
+                        <LayoutList className="w-4 h-4" />
+                    </Button>
                 </div>
                 
-                <div className="flex gap-4">
-                    <button className="btn-secondary flex items-center gap-2">
-                        <Plus className="w-4 h-4" />
-                        <span>Register_New_Node</span>
-                    </button>
-                </div>
+                <Button variant="secondary" className="gap-2 border-white/5 hover:border-emerald-500/30">
+                    <Plus className="w-4 h-4" />
+                    <span>Register_New_Protocol</span>
+                </Button>
             </div>
 
             {/* Providers Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 {providers.map((p: any) => (
-                    <div key={p.id} className="glass-card flex flex-col p-8 group hover:border-indigo-500/20 transition-all duration-500">
-                        <div className="flex items-start justify-between mb-8">
-                            <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center p-3">
+                    <Card key={p.id} className="group hover:border-emerald-500/20 transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+                        <CardHeader className="flex flex-row items-center justify-between pb-8">
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-[1.5rem] bg-zinc-900 border border-white/5 flex items-center justify-center p-4 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent" />
                                     <img 
-                                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${p.id}&backgroundColor=6366f1`} 
-                                        className="w-full h-full rounded-xl object-contain opacity-80" 
+                                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${p.id}&backgroundColor=10b981`} 
+                                        className="w-full h-full rounded-xl object-contain opacity-60 group-hover:opacity-100 transition-opacity" 
                                         alt={p.id} 
                                     />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold uppercase tracking-tight">{p.name || p.id}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <div className={`w-2 h-2 rounded-full ${p.enabled ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-red-500'} animate-pulse`} />
-                                        <span className={`text-[10px] uppercase font-bold tracking-widest ${p.enabled ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {p.enabled ? 'Protocol_Active' : 'Protocol_Deactivated'}
+                                    <CardTitle className="text-2xl uppercase italic tracking-tighter text-white">{p.name || p.id}</CardTitle>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${p.enabled ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-red-500'} animate-pulse`} />
+                                        <span className={`text-[9px] uppercase font-black tracking-[0.2em] ${p.enabled ? 'text-emerald-500' : 'text-red-500'}`}>
+                                            {p.enabled ? 'ONLINE' : 'OFFLINE'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <button className="p-3 rounded-xl hover:bg-white/5 text-muted hover:text-white">
+                            <Button variant="ghost" size="icon" className="opacity-20 hover:opacity-100">
                                 <MoreVertical className="w-5 h-5" />
-                            </button>
-                        </div>
+                            </Button>
+                        </CardHeader>
 
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase font-bold text-muted tracking-widest px-1">Access_Identifier (Client ID)</label>
+                        <CardContent className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[9px] uppercase font-black text-zinc-600 tracking-[0.3em] px-1">Identifier (Client_ID)</label>
                                 <input 
-                                    className="w-full p-4 rounded-xl bg-black/30 border border-white/5 focus:border-indigo-500/30 outline-none transition-all font-mono text-sm tracking-tight text-white/70"
+                                    className="w-full p-5 rounded-2xl bg-black/40 border border-white/5 focus:border-emerald-500/30 focus:shadow-[0_0_20px_rgba(16,185,129,0.05)] outline-none transition-all font-mono text-xs tracking-tight text-white/50 focus:text-white"
                                     defaultValue={p.clientId}
                                     onChange={(e) => p.clientId = e.target.value}
+                                    placeholder="node_id_4772x..."
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase font-bold text-muted tracking-widest px-1">Access_Secret (Client Secret)</label>
-                                <div className="relative">
-                                    <input 
-                                        type="password"
-                                        className="w-full p-4 rounded-xl bg-black/30 border border-white/5 focus:border-indigo-500/30 outline-none transition-all font-mono text-sm tracking-tight text-white/70"
-                                        defaultValue={p.clientSecret}
-                                        onChange={(e) => p.clientSecret = e.target.value}
-                                    />
-                                </div>
+                            <div className="space-y-3">
+                                <label className="text-[9px] uppercase font-black text-zinc-600 tracking-[0.3em] px-1">Integrity_Key (Client_Secret)</label>
+                                <input 
+                                    type="password"
+                                    className="w-full p-5 rounded-2xl bg-black/40 border border-white/5 focus:border-emerald-500/30 focus:shadow-[0_0_20px_rgba(16,185,129,0.05)] outline-none transition-all font-mono text-xs tracking-tight text-white/50 focus:text-white"
+                                    defaultValue={p.clientSecret}
+                                    onChange={(e) => p.clientSecret = e.target.value}
+                                    placeholder="••••••••••••••••"
+                                />
                             </div>
 
-                            <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                            <div className="flex items-center justify-between p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 group-hover:bg-white/[0.04] transition-colors">
                                 <div>
-                                    <p className="text-xs font-bold text-white mb-1">State_Sync</p>
-                                    <p className="text-[10px] text-muted">Enable or disable this authentication endpoint globally.</p>
+                                    <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1">State_Synchronization</p>
+                                    <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-tighter">Global Endpoint Control</p>
                                 </div>
                                 <button 
                                     onClick={() => {
                                         p.enabled = !p.enabled;
                                         setProviders([...providers]);
                                     }}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${p.enabled ? 'bg-indigo-600' : 'bg-white/10'}`}
+                                    className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none ${p.enabled ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white/10'}`}
                                 >
-                                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${p.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    <span className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-in-out ${p.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
                                 </button>
                             </div>
-                        </div>
+                        </CardContent>
 
-                        <div className="mt-10 flex gap-4">
-                            <button 
+                        <CardFooter className="flex gap-4 pt-10">
+                            <Button 
                                 onClick={() => handleUpdate(p)}
                                 disabled={isSaving === p.id}
-                                className="flex-1 btn-primary py-3"
+                                variant="premium"
+                                className="flex-1 h-14 group/btn"
                             >
                                 {isSaving === p.id ? (
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
-                                    <>
-                                        <Save className="w-4 h-4" />
-                                        <span>Update_Protocol</span>
-                                    </>
+                                    <div className="flex items-center justify-between w-full px-2">
+                                        <div className="flex items-center gap-3">
+                                            <Save className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                            <span>Update_Protocol</span>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 opacity-30 group-hover/btn:translate-x-1 transition-all" />
+                                    </div>
                                 )}
-                            </button>
-                            <button className="px-5 rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 text-muted hover:text-red-400 transition-all">
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all">
                                 <Trash2 className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
+                            </Button>
+                        </CardFooter>
+                    </Card>
                 ))}
             </div>
         </div>
