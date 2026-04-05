@@ -22,7 +22,7 @@ export default async function AdminDashboard() {
         headers: await headers(),
     });
 
-    if (!session || session.user.role !== 'admin') {
+    if (!session || (session.user as any).role !== 'admin') {
         redirect("/login/admin");
     }
 
