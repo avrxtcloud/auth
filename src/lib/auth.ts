@@ -113,7 +113,8 @@ export async function getDynamicAuthConfig() {
 			"https://auth.avrxt.in",
 			"https://www.avrxt.in",
 			"https://avrxt.in",
-			"http://localhost:3000"
+			"http://localhost:3000",
+			"http://localhost:3001"
 		],
 
 		plugins: [
