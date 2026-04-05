@@ -115,6 +115,6 @@ export default function AdminLoginPage() {
                     © 2026 avrxt.in • all rights reserved
                 </p>
             </div>
-        </div>
+        </main>
     );
 }
