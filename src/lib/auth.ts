@@ -135,4 +135,23 @@ export const auth = betterAuth({
 		schema: schema,
 	}),
 	advanced: { cookiePrefix: "avrxt_auth" },
+	plugins: [
+		admin({
+			defaultRole: "user",
+		}),
+	],
+	user: {
+		additionalFields: {
+			role: {
+				type: "string",
+				required: false,
+				defaultValue: "user",
+			},
+			banned: {
+				type: "boolean",
+				required: false,
+				defaultValue: false,
+			},
+		}
+	},
 });
