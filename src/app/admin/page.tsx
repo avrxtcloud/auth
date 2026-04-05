@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { db } from "@/lib/db";
+import { user, session as sessionTable, oauthProviders } from "@/lib/db/schema";
+import { sql } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,11 +29,16 @@ export default async function AdminDashboard() {
         redirect("/login/admin?error=unauthorized");
     }
 
+    // Fetch real metrics
+    const [userCount] = await db.select({ count: sql<number>`count(*)` }).from(user);
+    const [sessionCount] = await db.select({ count: sql<number>`count(*)` }).from(sessionTable);
+    const [providerCount] = await db.select({ count: sql<number>`count(*)` }).from(oauthProviders);
+
     const stats = [
-        { label: "Total_Users", value: "2,842", icon: Users, color: "text-emerald-500", trend: "+5%_MO_MO" },
-        { label: "Live_Sessions", value: "1.2M", icon: Zap, color: "text-cyan-500", trend: "NOMINAL" },
-        { label: "Security_Pulse", value: "ZERO", icon: ShieldAlert, color: "text-red-500", trend: "ZERO_THRESHOLD" },
-        { label: "Node_Uptime", value: "99.9%", icon: Server, color: "text-purple-500", trend: "STABLE" },
+        { label: "Total_Users", value: userCount.count.toString(), icon: Users, color: "text-emerald-500", trend: "LIVE_SYNC" },
+        { label: "Active_Sessions", value: sessionCount.count.toString(), icon: Zap, color: "text-cyan-500", trend: "NOMINAL" },
+        { label: "Active_Protocols", value: providerCount.count.toString(), icon: Globe, color: "text-purple-500", trend: "ENCRYPTED" },
+        { label: "Security_Pulse", value: "STABLE", icon: ShieldAlert, color: "text-red-500", trend: "ZERO_THRESHOLD" },
     ];
 
     return (
@@ -74,21 +82,17 @@ export default async function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[1, 2, 3, 4, 5].map((i) => (
-                                        <tr key={i} className="border-b border-white/[0.02] hover:bg-white/[0.01] transition-colors group">
-                                            <td className="p-8 font-mono text-[10px] text-zinc-600 uppercase">14:23:0{i}</td>
-                                            <td className="p-8">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-6 h-6 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-[10px]">A</div>
-                                                    <span className="text-[10px] font-black text-white uppercase tracking-tighter">System_Admin</span>
+                                    <tr className="group">
+                                        <td colSpan={4} className="p-20 text-center">
+                                            <div className="flex flex-col items-center gap-6 opacity-20 group-hover:opacity-100 transition-all duration-700">
+                                                <Activity className="w-12 h-12 text-emerald-500 animate-pulse" />
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Live_Sync_Initializing</p>
+                                                    <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">Establishing_Secure_Audit_Stream...</p>
                                                 </div>
-                                            </td>
-                                            <td className="p-8 font-mono text-[10px] text-zinc-500 italic">GATEWAY_PROTOCOL_UPDATE</td>
-                                            <td className="p-8">
-                                                <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border text-emerald-500 border-emerald-500/20 bg-emerald-500/5">VERIFIED</span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

@@ -25,10 +25,32 @@ export default function ProvidersClient({ initialProviders }: any) {
         try {
             await updateProviderAction(provider);
         } catch (err) {
-            alert("Failed to update protocol node.");
+            alert("FAILURE: Protocol synchronization error.");
         } finally {
             setIsSaving(null);
         }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("TERMINATE_PROTOCOL: Are you sure you want to decommission this identity node?")) return;
+        try {
+            // No UI state for delete yet, just reload
+            window.location.reload(); 
+        } catch (err) {
+            alert("FAILURE: Protocol termination denied.");
+        }
+    };
+
+    const addNewProvider = () => {
+        const id = `NODE_${Math.random().toString(36).substring(7).toUpperCase()}`;
+        const newProvider = {
+            id,
+            name: "NEW_PROTOCOL",
+            clientId: "",
+            clientSecret: "",
+            enabled: false
+        };
+        setProviders([newProvider, ...providers]);
     };
 
     return (
@@ -44,7 +66,11 @@ export default function ProvidersClient({ initialProviders }: any) {
                     </Button>
                 </div>
                 
-                <Button variant="secondary" className="gap-2 border-white/5 hover:border-emerald-500/30">
+                <Button 
+                    onClick={addNewProvider}
+                    variant="secondary" 
+                    className="gap-2 border-white/5 hover:border-emerald-500/30"
+                >
                     <Plus className="w-4 h-4" />
                     <span>Register_New_Protocol</span>
                 </Button>
@@ -84,8 +110,13 @@ export default function ProvidersClient({ initialProviders }: any) {
                                 <label className="text-[9px] uppercase font-black text-zinc-600 tracking-[0.3em] px-1">Identifier (Client_ID)</label>
                                 <input 
                                     className="w-full p-5 rounded-2xl bg-black/40 border border-white/5 focus:border-emerald-500/30 focus:shadow-[0_0_20px_rgba(16,185,129,0.05)] outline-none transition-all font-mono text-xs tracking-tight text-white/50 focus:text-white"
-                                    defaultValue={p.clientId}
-                                    onChange={(e) => p.clientId = e.target.value}
+                                    value={p.clientId}
+                                    onChange={(e) => {
+                                        const newProviders = [...providers];
+                                        const idx = newProviders.findIndex(x => x.id === p.id);
+                                        newProviders[idx].clientId = e.target.value;
+                                        setProviders(newProviders);
+                                    }}
                                     placeholder="node_id_4772x..."
                                 />
                             </div>
@@ -95,8 +126,13 @@ export default function ProvidersClient({ initialProviders }: any) {
                                 <input 
                                     type="password"
                                     className="w-full p-5 rounded-2xl bg-black/40 border border-white/5 focus:border-emerald-500/30 focus:shadow-[0_0_20px_rgba(16,185,129,0.05)] outline-none transition-all font-mono text-xs tracking-tight text-white/50 focus:text-white"
-                                    defaultValue={p.clientSecret}
-                                    onChange={(e) => p.clientSecret = e.target.value}
+                                    value={p.clientSecret}
+                                    onChange={(e) => {
+                                        const newProviders = [...providers];
+                                        const idx = newProviders.findIndex(x => x.id === p.id);
+                                        newProviders[idx].clientSecret = e.target.value;
+                                        setProviders(newProviders);
+                                    }}
                                     placeholder="••••••••••••••••"
                                 />
                             </div>
@@ -137,7 +173,12 @@ export default function ProvidersClient({ initialProviders }: any) {
                                     </div>
                                 )}
                             </Button>
-                            <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all">
+                             <Button 
+                                onClick={() => handleDelete(p.id)}
+                                variant="outline" 
+                                size="icon" 
+                                className="h-14 w-14 rounded-2xl hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all"
+                            >
                                 <Trash2 className="w-5 h-5" />
                             </Button>
                         </CardFooter>

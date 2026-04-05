@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "OAuth Protocols", href: "/admin/providers", icon: Globe },
         { name: "Users", href: "/admin/users", icon: Users },
         { name: "Audit Logs", href: "/admin/logs", icon: Activity },
-        { name: "Settings", href: "/admin/settings", icon: Settings },
+        { name: "Settings", href: "/admin/etc", icon: Settings },
     ];
 
     return (
