@@ -1,109 +1,143 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Shield, Save, ToggleLeft, ToggleRight, Key, Plus, Trash2, Edit } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { updateProviderAction, deleteProviderAction } from './actions';
+import { useState } from "react";
+import { updateProviderAction, deleteProviderAction } from "./actions";
+import { 
+    Plus, 
+    Trash2, 
+    Save, 
+    MoreVertical, 
+    CheckCircle, 
+    XCircle,
+    LayoutGrid,
+    LayoutList
+} from "lucide-react";
 
-export default function ProvidersClient({ initialProviders }: { initialProviders: any[] }) {
+export default function ProvidersClient({ initialProviders }: any) {
     const [providers, setProviders] = useState(initialProviders);
-    const [isSaving, setIsSaving] = useState(false);
-    const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
+    const [isSaving, setIsSaving] = useState<string | null>(null);
 
-    const handleUpdate = async (p: any) => {
-        setIsSaving(true);
+    const handleUpdate = async (provider: any) => {
+        setIsSaving(provider.id);
         try {
-            await updateProviderAction(p);
-            setStatus({ type: 'success', msg: `SYNCED: ${p.id.toUpperCase()}_INITIALIZED` });
-        } catch (e: any) {
-            setStatus({ type: 'error', msg: `FAILURE: ${e.message}` });
+            await updateProviderAction(provider);
+            // Visual feedback
+        } catch (err) {
+            alert("Failed to update protocol node.");
         } finally {
-            setIsSaving(false);
-            setTimeout(() => setStatus({ type: null, msg: '' }), 5000);
+            setIsSaving(null);
         }
     };
 
-    const toggleEnabled = (id: string) => {
-        setProviders(prev => prev.map(p => p.id === id ? { ...p, enabled: !p.enabled } : p));
-    };
-
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-black italic uppercase tracking-tight">Identity_Providers</h2>
-                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">Manage OAuth Auth Controllers</p>
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            {/* Toolbar Area */}
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex bg-white/5 rounded-xl border border-white/10 p-1">
+                    <button className="p-2 rounded-lg bg-white/10 text-white transition-all">
+                        <LayoutGrid className="w-5 h-5 opacity-80" />
+                    </button>
+                    <button className="p-2 rounded-lg text-muted hover:text-white transition-all">
+                        <LayoutList className="w-5 h-5 opacity-80" />
+                    </button>
                 </div>
-                {status.type && (
-                    <div className={cn(
-                        "px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest font-bold",
-                        status.type === 'success' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
-                    )}>
-                        {status.msg}
-                    </div>
-                )}
-            </header>
+                
+                <div className="flex gap-4">
+                    <button className="btn-secondary flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        <span>Register_New_Node</span>
+                    </button>
+                </div>
+            </div>
 
-            <div className="grid gap-4">
-                {providers.map((provider) => (
-                    <div key={provider.id} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col gap-6 group">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center">
-                                    <Key className={cn("w-5 h-5", provider.enabled ? "text-emerald-500" : "text-zinc-700")} />
+            {/* Providers Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {providers.map((p: any) => (
+                    <div key={p.id} className="glass-card flex flex-col p-8 group hover:border-indigo-500/20 transition-all duration-500">
+                        <div className="flex items-start justify-between mb-8">
+                            <div className="flex items-center gap-5">
+                                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center p-3">
+                                    <img 
+                                        src={`https://api.dicebear.com/7.x/initials/svg?seed=${p.id}&backgroundColor=6366f1`} 
+                                        className="w-full h-full rounded-xl object-contain opacity-80" 
+                                        alt={p.id} 
+                                    />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold uppercase tracking-tight italic">{provider.name}</h3>
-                                    <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">ID: {provider.id}</span>
+                                    <h3 className="text-xl font-bold uppercase tracking-tight">{p.name || p.id}</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className={`w-2 h-2 rounded-full ${p.enabled ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-red-500'} animate-pulse`} />
+                                        <span className={`text-[10px] uppercase font-bold tracking-widest ${p.enabled ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {p.enabled ? 'Protocol_Active' : 'Protocol_Deactivated'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => toggleEnabled(provider.id)}
-                                className={cn("transition-colors", provider.enabled ? "text-emerald-500" : "text-zinc-800")}
-                            >
-                                {provider.enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+                            <button className="p-3 rounded-xl hover:bg-white/5 text-muted hover:text-white">
+                                <MoreVertical className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-mono text-zinc-500 px-1">CLIENT_ID</label>
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] uppercase font-bold text-muted tracking-widest px-1">Access_Identifier (Client ID)</label>
                                 <input 
-                                    type="text" 
-                                    value={provider.clientId}
-                                    onChange={(e) => setProviders(prev => prev.map(p => p.id === provider.id ? { ...p, clientId: e.target.value } : p))}
-                                    className="w-full h-12 bg-black/40 border border-white/5 rounded-xl px-4 text-xs font-mono focus:border-white/20 outline-none transition-all"
+                                    className="w-full p-4 rounded-xl bg-black/30 border border-white/5 focus:border-indigo-500/30 outline-none transition-all font-mono text-sm tracking-tight text-white/70"
+                                    defaultValue={p.clientId}
+                                    onChange={(e) => p.clientId = e.target.value}
                                 />
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-mono text-zinc-500 px-1">CLIENT_SECRET</label>
-                                <input 
-                                    type="password" 
-                                    value={provider.clientSecret}
-                                    onChange={(e) => setProviders(prev => prev.map(p => p.id === provider.id ? { ...p, clientSecret: e.target.value } : p))}
-                                    className="w-full h-12 bg-black/40 border border-white/5 rounded-xl px-4 text-xs font-mono focus:border-white/20 outline-none transition-all"
-                                    placeholder="••••••••••••••••"
-                                />
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] uppercase font-bold text-muted tracking-widest px-1">Access_Secret (Client Secret)</label>
+                                <div className="relative">
+                                    <input 
+                                        type="password"
+                                        className="w-full p-4 rounded-xl bg-black/30 border border-white/5 focus:border-indigo-500/30 outline-none transition-all font-mono text-sm tracking-tight text-white/70"
+                                        defaultValue={p.clientSecret}
+                                        onChange={(e) => p.clientSecret = e.target.value}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                                <div>
+                                    <p className="text-xs font-bold text-white mb-1">State_Sync</p>
+                                    <p className="text-[10px] text-muted">Enable or disable this authentication endpoint globally.</p>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        p.enabled = !p.enabled;
+                                        setProviders([...providers]);
+                                    }}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${p.enabled ? 'bg-indigo-600' : 'bg-white/10'}`}
+                                >
+                                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${p.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </button>
                             </div>
                         </div>
 
-                        <div className="flex justify-end pt-2">
+                        <div className="mt-10 flex gap-4">
                             <button 
-                                onClick={() => handleUpdate(provider)}
-                                disabled={isSaving}
-                                className="px-6 h-10 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                                onClick={() => handleUpdate(p)}
+                                disabled={isSaving === p.id}
+                                className="flex-1 btn-primary py-3"
                             >
-                                <Save size={14} /> Update_{provider.id.toUpperCase()}
+                                {isSaving === p.id ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <Save className="w-4 h-4" />
+                                        <span>Update_Protocol</span>
+                                    </>
+                                )}
+                            </button>
+                            <button className="px-5 rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 text-muted hover:text-red-400 transition-all">
+                                <Trash2 className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
                 ))}
-
-                {/* Add New Provider Mockup/Button */}
-                <button className="p-8 rounded-3xl border-2 border-dashed border-white/5 hover:border-white/10 transition-all flex flex-col items-center justify-center gap-3 group text-zinc-700 hover:text-zinc-500">
-                    <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest font-black italic">Initialize_New_Control_Gateway</span>
-                </button>
             </div>
         </div>
     );

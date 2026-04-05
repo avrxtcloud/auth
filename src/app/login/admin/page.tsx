@@ -1,103 +1,116 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { signIn } from '@/lib/auth-client';
-import { Shield, ChevronRight, Lock, Command, Github, Twitter } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { Shield, Lock, ShieldCheck, Discord } from "lucide-react";
 
 export default function AdminLoginPage() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleDiscordLogin = async () => {
-        setIsLoading(true);
-        setError(null);
+    const handleLogin = async () => {
+        setLoading(true);
+        setError("");
         try {
-            await signIn.social({
-                provider: 'discord',
-                callbackURL: '/admin', // Redirect to the internal admin panel on the auth subdomain
+            await authClient.signIn.social({
+                provider: "discord",
+                callbackURL: "/admin",
             });
         } catch (err: any) {
-            setError(err.message || 'AUTHENTICATION_FAILURE');
-            setIsLoading(false);
+            setError(err?.message || "An unexpected error occurred. Please try again.");
+            setLoading(false);
         }
     };
 
     return (
-        <main className="min-h-screen bg-[#020202] text-white flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Background Ambience */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-            </div>
+        <main className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            {/* Ambient Background */}
+            <div className="bg-mesh" />
+            <div className="bg-grid" />
+            
+            {/* Grain Overlay */}
+            <div className="fixed inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
 
-            <div className="relative z-10 w-full max-w-md">
-                {/* Logo Area */}
-                <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 backdrop-blur-xl group hover:border-white/20 transition-all">
-                        <Shield className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-500" />
+            <div className="w-full max-w-md px-6 animate-fade-in">
+                {/* Logo & Branding */}
+                <div className="flex flex-col items-center mb-10 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-indigo-500/20 rotate-12 hover:rotate-0 transition-all duration-500">
+                        <Shield className="w-9 h-9 text-white" />
                     </div>
-                    <h1 className="text-2xl font-black tracking-tighter uppercase italic text-center">
-                        AVRXT <span className="text-zinc-500">AUTH_SYSTEM</span>
-                    </h1>
-                    <p className="text-[10px] font-mono text-zinc-500 tracking-[0.3em] uppercase mt-2">Secure Access Gateway v2.0</p>
+                    <h1 className="text-4xl font-bold mb-3 tracking-tight">AVRXT_GATEWAY</h1>
+                    <p className="muted max-w-[280px]">
+                        Secure authentication node for the <span className="text-[#fff]">avrxt.in</span> infrastructure core.
+                    </p>
                 </div>
 
                 {/* Login Card */}
-                <div className="bg-white/[0.03] border border-white/10 p-8 rounded-3xl backdrop-blur-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-1000">
-                    <div className="space-y-6">
-                        <div className="space-y-2 text-center mb-4">
-                            <h2 className="text-lg font-bold tracking-tight uppercase">Administrator_Login</h2>
-                            <p className="text-xs text-zinc-500">Authorization required for access to the core infrastructure.</p>
-                        </div>
+                <div className="glass-card flex flex-col items-center text-center">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                        <Lock className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    
+                    <h2 className="text-xl font-semibold mb-2">Administrator_Login</h2>
+                    <p className="muted mb-8 text-sm">
+                        Verification required for server-side management.
+                    </p>
 
-                        {error && (
-                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 animate-in shake duration-500">
-                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                                <span className="text-[10px] font-mono text-red-500 tracking-wider uppercase font-bold">ERROR: {error}</span>
-                            </div>
+                    {error && (
+                        <div className="w-full mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+                            {error}
+                        </div>
+                    )}
+
+                    <button 
+                        onClick={handleLogin}
+                        disabled={loading}
+                        className="btn-primary"
+                    >
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <Discord className="w-5 h-5" />
+                                <span>Continue_with_Discord</span>
+                            </>
                         )}
+                    </button>
 
-                        <button
-                            onClick={handleDiscordLogin}
-                            disabled={isLoading}
-                            className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest text-sm rounded-2xl flex items-center justify-center gap-3 hover:translate-y-[-2px] hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all active:scale-[0.98] disabled:opacity-50 group overflow-hidden relative"
-                        >
-                            <span className="relative z-10 flex items-center gap-3">
-                                {isLoading ? (
-                                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                                ) : (
-                                    <>
-                                        <Command className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                                        Continue_with_Discord
-                                    </>
-                                )}
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        </button>
-
-                        <div className="pt-4 border-t border-white/5 flex flex-col gap-3">
-                           <div className="flex items-center justify-between px-2">
-                                <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Protocol_Secured</span>
-                                <div className="flex gap-1">
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse delay-300" />
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse delay-700" />
-                                </div>
-                           </div>
+                    <div className="mt-8 flex items-center justify-center gap-6 opacity-30">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span className="text-[10px] uppercase tracking-widest font-medium">Protocol_v2.0</span>
                         </div>
+                        <div className="w-1 h-1 rounded-full bg-white" />
+                        <span className="text-[10px] uppercase tracking-widest font-medium">© 2026 AVRXT</span>
                     </div>
                 </div>
-
-                {/* Footer Credits */}
-                <div className="mt-8 flex items-center justify-center gap-6 opacity-30 hover:opacity-100 transition-opacity duration-700 grayscale hover:grayscale-0">
-                    <Github className="w-4 h-4 cursor-pointer hover:text-white" />
-                    <Twitter className="w-4 h-4 cursor-pointer hover:text-white" />
-                    <div className="h-4 w-[1px] bg-white/20" />
-                    <span className="text-[10px] font-mono uppercase tracking-widest">&copy; 2026 AVRXT</span>
-                </div>
             </div>
+
+            {/* Custom CSS overrides for tailwind-like behavior on pure CSS project */}
+            <style jsx>{`
+                .text-4xl { font-size: 2.25rem; }
+                .text-xl { font-size: 1.25rem; }
+                .text-sm { font-size: 0.875rem; }
+                .font-bold { font-weight: 700; }
+                .font-semibold { font-weight: 600; }
+                .mb-10 { margin-bottom: 2.5rem; }
+                .mb-2 { margin-bottom: 0.5rem; }
+                .mb-3 { margin-bottom: 0.75rem; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .mb-8 { margin-bottom: 2rem; }
+                .mt-8 { margin-top: 2rem; }
+                .tracking-tight { letter-spacing: -0.025em; }
+                .tracking-widest { letter-spacing: 0.1em; }
+                .text-center { text-align: center; }
+                .rotate-12 { transform: rotate(12deg); }
+                .hover\:rotate-0:hover { transform: rotate(0deg); }
+                .transition-all { transition: all 0.5s; }
+                .duration-500 { transition-duration: 0.5s; }
+                .gap-2 { gap: 0.5rem; }
+                .gap-6 { gap: 1.5rem; }
+                .uppercase { text-transform: uppercase; }
+            `}</style>
         </main>
     );
 }

@@ -1,165 +1,171 @@
-'use client';
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { 
+    Users, 
+    ShieldAlert, 
+    LayoutDashboard, 
+    Settings, 
+    LogOut, 
+    ShieldCheck, 
+    Zap,
+    Globe,
+    Activity
+} from "lucide-react";
+import Link from "next/link";
 
-import { useState, useEffect } from 'react';
-import { authClient } from '@/lib/auth-client';
-import { Users, ShieldAlert, Activity, LayoutDashboard, Search, Ban, Unlock, UserCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
+export default async function AdminDashboard() {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
-export default function AdminDashboard() {
-    const { data: session, isPending } = authClient.useSession();
-    const [users, setUsers] = useState<any[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    if (!session || session.user.role !== 'admin') {
+        redirect("/login/admin");
+    }
 
-    // Initial check for session and redirect if not admin
-    useEffect(() => {
-        if (!isPending && (!session || session.user.role !== 'admin')) {
-             // Redirect away if unauthorized
-             window.location.href = '/login/admin';
-        }
-    }, [session, isPending]);
-
-    const fetchUsers = async () => {
-        setIsRefreshing(true);
-        try {
-            // Use better-auth admin plugin to list users
-            const response = await authClient.admin.listUsers({
-                query: {
-                    limit: 100,
-                }
-            });
-            if (response.data) {
-                setUsers(response.data.users);
-            }
-        } catch (e) {
-            console.error("List users failed", e);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        if (session?.user?.role === 'admin') {
-            fetchUsers();
-        }
-    }, [session]);
-
-    if (isPending) return <div className="min-h-screen bg-black flex items-center justify-center font-mono text-zinc-500 uppercase italic">Verifying_Credentials...</div>;
-
-    const filteredUsers = users.filter(u => 
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        u.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const StatCard = ({ title, value, icon, color }: any) => (
+        <div className="glass-card flex items-center gap-6 group hover:border-[#fff]/20 transition-all duration-300">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-tr ${color} shadow-lg shadow-${color.split(' ')[1]}/20 group-hover:scale-110 transition-transform`}>
+                {icon}
+            </div>
+            <div>
+                <p className="muted text-xs uppercase tracking-widest font-semibold mb-1">{title}</p>
+                <h3 className="text-2xl font-bold">{value}</h3>
+            </div>
+        </div>
     );
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex">
-            {/* Sidebar */}
-            <aside className="w-64 border-r border-white/5 bg-black/20 flex flex-col p-6 gap-8">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-emerald-500" />
-                    </div>
-                    <span className="font-black tracking-tighter uppercase italic text-sm">AVRXT_CORE</span>
-                </div>
-
-                <nav className="space-y-1">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-white/5 text-white text-xs font-bold uppercase tracking-widest transition-all">
-                        <LayoutDashboard size={14} /> Dashboard
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-zinc-600 hover:text-white text-xs font-bold uppercase tracking-widest transition-all">
-                        <Users size={14} /> Users
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-zinc-600 hover:text-white text-xs font-bold uppercase tracking-widest transition-all">
-                        <ShieldAlert size={14} /> Security
-                    </button>
-                </nav>
-
-                <div className="mt-auto p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-transparent border border-white/5">
-                    <p className="text-[9px] font-mono text-zinc-500 uppercase mb-2">Authenticated_As</p>
-                    <p className="text-[10px] font-bold truncate underline underline-offset-4 decoration-zinc-800 uppercase italic">{session?.user.email}</p>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 p-10 overflow-y-auto">
-                <header className="flex items-center justify-between mb-12">
-                    <div>
-                        <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-1">User_Pulse</h1>
-                        <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em]">Infrastructure Management Interface</p>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                            <input 
-                                type="text" 
-                                placeholder="SEARCH_IDENTIFIER..."
-                                className="h-12 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 text-xs font-mono focus:border-white/40 transition-all outline-none min-w-[300px] uppercase"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+        <div className="min-h-screen bg-mesh">
+            <div className="bg-grid opacity-50" />
+            
+            <div className="flex">
+                {/* Modern Sidebar */}
+                <aside className="w-72 min-h-screen sticky top-0 bg-white/[0.02] border-r border-white/[0.05] p-8 flex flex-col backdrop-blur-xl">
+                    <div className="flex items-center gap-3 mb-12">
+                        <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center">
+                            <ShieldCheck className="w-6 h-6 text-white" />
                         </div>
-                        <button 
-                            onClick={fetchUsers}
-                            className="h-12 px-6 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        >
-                            {isRefreshing ? 'SYNCING...' : 'SYNC_NOW'}
+                        <span className="font-bold text-lg tracking-tight">AVRXT_ADMIN</span>
+                    </div>
+
+                    <nav className="flex-1 flex flex-col gap-2">
+                        <Link href="/admin" className="p-3 rounded-xl bg-white/5 border border-white/10 text-white flex items-center gap-3 font-medium transition-all">
+                            <LayoutDashboard className="w-5 h-5 opacity-70" />
+                            <span>Dashboard</span>
+                        </Link>
+                        <Link href="/admin/users" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
+                            <Users className="w-5 h-5 opacity-70" />
+                            <span>User_Management</span>
+                        </Link>
+                        <Link href="/admin/providers" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
+                            <Globe className="w-5 h-5 opacity-70" />
+                            <span>OAuth_Protocols</span>
+                        </Link>
+                        <div className="my-4 border-t border-white/[0.05]" />
+                        <Link href="/admin/security" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
+                            <ShieldAlert className="w-5 h-5 opacity-70" />
+                            <span>Security_Nodes</span>
+                        </Link>
+                        <Link href="/admin/logs" className="p-3 rounded-xl text-muted hover:bg-white/5 hover:text-white flex items-center gap-3 font-medium transition-all">
+                            <Activity className="w-5 h-5 opacity-70" />
+                            <span>System_Logs</span>
+                        </Link>
+                    </nav>
+
+                    <div className="mt-auto pt-8 border-t border-white/[0.05]">
+                        <div className="flex items-center gap-4 p-3 mb-6 bg-white/[0.03] rounded-2xl border border-white/[0.05]">
+                            <img src={session.user.image || ''} className="w-10 h-10 rounded-xl" alt="avatar" />
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-bold truncate">{session.user.name}</p>
+                                <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Access_Level: ADMIN</p>
+                            </div>
+                        </div>
+                        <button className="w-full btn-secondary flex items-center justify-center gap-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                            <LogOut className="w-4 h-4" />
+                            <span>Protocol_SignOut</span>
                         </button>
                     </div>
-                </header>
+                </aside>
 
-                {/* Table */}
-                <div className="grid gap-4">
-                    {filteredUsers.length === 0 ? (
-                        <div className="p-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
-                            <Users className="w-10 h-10 text-zinc-800 mx-auto mb-4" />
-                            <p className="text-zinc-600 font-mono text-xs uppercase tracking-widest">No matching nodes found in the network</p>
+                {/* Main Content Area */}
+                <main className="flex-1 p-12">
+                    <section className="mb-12 animate-fade-in">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h1 className="mb-2">Admin_Control_Panel</h1>
+                                <p className="muted">Real-time infrastructure management and user oversight.</p>
+                            </div>
+                            <div className="btn-primary w-fit text-sm">
+                                <Zap className="w-4 h-4 fill-current" />
+                                <span>Core_Online</span>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="border border-white/5 bg-white/[0.01] rounded-3xl overflow-hidden">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-white/[0.02] border-b border-white/5">
-                                    <tr>
-                                        <th className="px-6 py-4 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Identity</th>
-                                        <th className="px-6 py-4 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Role</th>
-                                        <th className="px-6 py-4 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-4 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Activity</th>
-                                        <th className="px-6 py-4 text-right"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredUsers.map((user) => (
-                                        <tr key={user.id} className="border-b border-white/5 last:border-0 group hover:bg-white/[0.02] transition-colors">
-                                            <td className="px-6 py-6 font-bold uppercase italic text-sm tracking-tight">{user.name} <span className="block text-[9px] font-mono opacity-20 italic lowercase not-italic normal-case">{user.email}</span></td>
-                                            <td className="px-6">
-                                                <span className={cn(
-                                                    "px-2.5 py-1 text-[8px] font-black rounded uppercase tracking-widest",
-                                                    user.role === 'admin' ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" : "bg-white/5 text-zinc-500 border border-white/10"
-                                                )}>{user.role}</span>
-                                            </td>
-                                            <td className="px-6">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", user.banned ? "bg-red-500" : "bg-emerald-500")} />
-                                                    <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest">{user.banned ? 'Banned' : 'Authorized'}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6">
-                                                <span className="text-[9px] font-mono text-zinc-600 uppercase">{new Date(user.createdAt).toLocaleDateString()}</span>
-                                            </td>
-                                            <td className="px-6 text-right">
-                                                <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button className="p-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20"><UserCheck size={14} /></button>
-                                                    <button className="p-2 rounded-lg bg-white/5 border border-white/10 hover:border-red-500/50 hover:text-red-500 transition-colors"><Ban size={14} /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <StatCard 
+                                title="Active_Nodes" 
+                                value="2,842" 
+                                icon={<Users className="w-7 h-7 text-white" />}
+                                color="from-blue-500 to-indigo-600"
+                            />
+                            <StatCard 
+                                title="Auth_Streams" 
+                                value="1.2M" 
+                                icon={<ShieldCheck className="w-7 h-7 text-white" />}
+                                color="from-purple-500 to-pink-600"
+                            />
+                            <StatCard 
+                                title="System_Uptime" 
+                                value="99.98%" 
+                                icon={<Zap className="w-7 h-7 text-white" />}
+                                color="from-amber-500 to-orange-600"
+                            />
+                            <StatCard 
+                                title="Threat_Level" 
+                                value="LOW" 
+                                icon={<ShieldAlert className="w-7 h-7 text-white" />}
+                                color="from-emerald-500 to-teal-600"
+                            />
                         </div>
-                    )}
-                </div>
-            </main>
+                    </section>
+
+                    {/* Dashboard Placeholder Content */}
+                    <div className="glass-card mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                        <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/[0.05]">
+                            <h3 className="text-xl font-bold">Protocol_Activity</h3>
+                            <button className="text-indigo-400 text-sm font-bold hover:underline">View_Global_Logs</button>
+                        </div>
+                        <div className="space-y-6">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="flex items-center gap-6 p-4 rounded-2xl hover:bg-white/[0.02] transition-all">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+                                        <Activity className="w-6 h-6 text-muted" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-bold mb-1">New Administrator Authentication Verified</p>
+                                        <p className="text-xs text-muted">Node ID: DE-FRA-01 • Timestamp: 14:23:02 • Protocol: OAUTH2_DISCORD</p>
+                                    </div>
+                                    <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest">
+                                        Verified
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <style jsx>{`
+                .text-2xl { font-size: 1.5rem; }
+                .text-lg { font-size: 1.125rem; }
+                .text-muted { color: var(--muted); }
+                .tracking-wider { letter-spacing: 0.05em; }
+                .tracking-widest { letter-spacing: 0.1em; }
+                .mb-12 { margin-bottom: 3rem; }
+                .animate-fade-in { opacity: 0; animation: fadeIn 0.8s forwards; }
+            `}</style>
         </div>
     );
 }
